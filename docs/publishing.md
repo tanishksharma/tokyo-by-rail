@@ -3,11 +3,11 @@
 ## Release target
 
 - App: Tokyo by Rail, version `1.0.0`.
-- Repository: public `tanishksharma/tokyobyrail`.
+- Repository: public `tanishksharma/tokyo-by-rail`.
 - Production: `https://tokyorail.tanishk.ai` from `main`.
 - Staging: `https://tokyorail-staging.tanishk.ai` from `staging`.
-- Vercel: one project for this app; its Git integration builds pushed commits.
-- Domain and staging alias: planned, not configured or verified.
+- Vercel project: `tokyo-by-rail`, `prj_iHuihb5bv2Gm3uStyxIOpr0wEnY6`, team `tanishksharmas-projects`; Git integration builds pushed commits.
+- Production domain and staging branch domain: configured and ownership verified. Validate each deployed release before calling it live.
 - No unified menu in this release.
 
 ## Build and review
@@ -43,4 +43,11 @@
 ## Limits
 
 - Shared hearts, opening counts, and melody links need an internet connection.
-- No production domain, deployment, or native phone installation is confirmed by this document.
+- Native phone installation: owner device check pending. Live-release evidence belongs in the private publishing report.
+
+## Publication report
+
+- Generate the private release review with `node scripts/publish-review.mjs --sourceDirectory dist --liveBase https://tokyorail.tanishk.ai/ --outputPath /absolute/private/path/review.html`.
+- Report source commit, observed live release, links, metadata, assets, headers, and pending manual checks. Keep the report outside deployment output.
+- Website discovery: https://tanishk.ai/explore#mini-app-store. Legacy website calculator paths redirect to the independent app roots with query inputs preserved.
+- Collective workflow: https://app.notion.com/p/390b4fa1867c8111a265e5efd081e9ba.
