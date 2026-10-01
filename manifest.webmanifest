@@ -1,7 +1,7 @@
 {
   "name": "Tokyo by rail",
   "short_name": "Tokyo by rail",
-  "description": "Every passenger line on the Greater Tokyo network — 98 lines across 22 companies — with its official color, symbol and station-number badge, in one searchable index.",
+  "description": "Every passenger line on the Greater Tokyo network \u2014 98 lines across 22 companies \u2014 with its official color, symbol and station-number badge, in one searchable index.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -26,5 +26,6 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "id": "/"
 }

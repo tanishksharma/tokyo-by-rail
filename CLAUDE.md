@@ -364,18 +364,12 @@ A release line in `RELEASES` says what changed ON THE PAGE, in words a
 reader who has never seen the file would understand. Add one whenever
 something visible ships.
 
-## Branching — NO staging, ever
+## Branching and deployment
 
-This repo deliberately has no staging environment. This overrides the
-staging-first workflow used in the other projects:
-
-- `main` IS production. Vercel deploys it on every push.
-- Every change, however large: create a feature branch, build on it, then
-  merge it DIRECTLY into `main`. No intermediate branch of any kind.
-- Never create, push to, or merge through a `staging` branch. If one ever
-  appears, it is a mistake — say so instead of using it.
-- Feature-branch previews (Vercel deploys every branch) are the only
-  pre-production look.
+- `main`: production at https://tokyorail.tanishk.ai/.
+- `staging`: preview at https://tokyorail-staging.tanishk.ai/.
+- Feature branches: independent Vercel previews.
+- Version and release workflow: docs/publishing.md.
 
 ## Staying current, and the audio session
 
@@ -456,8 +450,8 @@ The rules it establishes for anything added later:
 
 ## Stack rules
 
-- Vanilla HTML, CSS and JS. No frameworks, no build step, no npm runtime
-  deps, no TypeScript.
+- Vanilla HTML, CSS and JS. No frameworks, npm runtime dependencies or TypeScript.
+  Static build copies runtime files and generates the offline inventory.
 - Styling comes from the Facet design system, loaded LIVE from
   `https://facet.tanishksharma.com/lib/facet.css` + `facet.js` — never
   vendored, never copied in. Component reference:
@@ -475,10 +469,15 @@ The rules it establishes for anything added later:
 
 ## What NOT to do
 
-- Do not add a staging branch or environment (see above).
 - Do not introduce a bundler, framework, or package.json.
 - Do not let the browser write to the database directly, and do not put a
   service-role key anywhere near the client (see The backend above).
 - Do not vendor the Facet library or pin its files locally.
 - Do not import anything from the tanishksharmacom repo's `/apps` area — this
   site stands alone.
+
+## V1 release context
+- Version 1.0.0; main production at https://tokyorail.tanishk.ai/.
+- Staging branch previews at https://tokyorail-staging.tanishk.ai/.
+- Build, offline storage, installation and release checks: docs/publishing.md.
+- Core rail information works after complete offline download; shared hearts, opening counts and YouTube links need a connection.

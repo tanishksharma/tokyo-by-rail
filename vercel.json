@@ -43,5 +43,7 @@
         }
       ]
     }
-  ]
+  ],
+  "buildCommand": "node scripts/build-app.mjs offline-remote.json",
+  "outputDirectory": "dist"
 }

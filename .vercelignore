@@ -1,0 +1,8 @@
+docs
+scripts/publish-review.mjs
+scripts/publish-review.html
+AGENTS.md
+CLAUDE.md
+README.md
+dist
+supabase

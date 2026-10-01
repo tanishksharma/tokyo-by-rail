@@ -39,8 +39,9 @@
        here whatever its shape; plus a plain Japanese sans for the card's
        kanji watermark -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@600&family=Noto+Sans+JP:wght@400;900&display=swap">
-  <script src="https://facet.tanishksharma.com/lib/facet.js" defer data-service-worker="/sw.js"></script>
+  <script src="https://facet.tanishksharma.com/lib/facet.js" defer ></script>
 
+  <script src="/install.js" defer></script>
   <style>
     /* Bespoke visualisation CSS — justified: the station-number badge and
        the card's line-color underline render each line's OFFICIAL signage
@@ -1016,6 +1017,7 @@
       <div class="about">
         <header class="about-head">
           <h2>Tokyo by rail</h2>
+          <p>Version 1.0 · Shared hearts and opening counts need a connection; the network, maps and saved filters work offline.</p>
           <p>Every passenger railway line in Greater Tokyo, with the colour,
              the symbol and the station numbers each one actually uses.
              98 lines, 22 companies, 1,631 stations.</p>
@@ -1028,7 +1030,7 @@
           <div><b>1,631</b><span>stations</span></div>
         </div>
 
-        <div class="about-actions">
+        <div class="about-actions"><button class="btn" type="button" data-app-install>Add to Home Screen</button><p data-app-install-status aria-live="polite">Preparing offline download.</p>
           <button type="button" class="btn btn-primary" id="about-share"
                   data-event="about-share">Share this app</button>
           <a class="btn btn-secondary" id="about-bug"
@@ -1836,7 +1838,9 @@
        and the toasts and nothing else. */
     const fx = () => (typeof facet === "undefined" ? null : facet);
 
-    const hearts = new Map();     // line key -> the count the server gave us
+    const hearts = new Map();
+    try { for (const [key,count] of Object.entries(JSON.parse(localStorage.getItem("rail-counts") || "{}"))) hearts.set(key,count); } catch {}
+    const saveCounts = () => { try { localStorage.setItem("rail-counts",JSON.stringify(Object.fromEntries(hearts))); } catch {} };     // line key -> the count the server gave us
     const mine = new Set();       // line keys this browser has hearted
     try {
       for (const k of JSON.parse(localStorage.getItem("hearted") || "[]")) mine.add(k);
@@ -1887,12 +1891,13 @@
     /* One request brings every count. A line nobody has hearted has no row
        and reads as zero; a failed request leaves the zeros in place and the
        hearts still work, since the first tap returns the true number. */
-    const loadHearts = () =>
+    const loadHearts = () => !navigator.onLine ? Promise.resolve() :
       fetch(`${DB}/rest/v1/rail_line_likes?select=line_key,likes`, { headers: { apikey: DB_KEY } })
         .then(r => r.ok ? r.json() : null)
         .then(rows => {
           if (!rows) return;                       // a bad answer proves nothing
           for (const r of rows) hearts.set(r.line_key, r.likes);
+          saveCounts();
           /* Reconcile. This browser's own list is a memory of taps, and a
              tap that never reached the server left a heart red on a line
              the server has never heard of — which is how a red heart came
@@ -2747,7 +2752,7 @@
       aboutDone = true;
       $("about-releases").innerHTML = RELEASES.map(([when, what]) =>
         `<li><time>${esc(when)}</time><p>${esc(what)}</p></li>`).join("");
-      fetch(`${DB}/rest/v1/rail_app_opens?select=opens`, { headers: { apikey: DB_KEY } })
+      if (navigator.onLine) fetch(`${DB}/rest/v1/rail_app_opens?select=opens`, { headers: { apikey: DB_KEY } })
         .then(r => r.ok ? r.json() : [])
         .then(rows => { $("about-opens").textContent =
           rows.reduce((n, r) => n + (r.opens || 0), 0).toLocaleString(); })
@@ -2757,6 +2762,7 @@
     };
     /* Counted once a session: a refresh is the same visit. */
     const countOpen = () => {
+      if (!navigator.onLine) return;
       try {
         if (sessionStorage.getItem("opened")) return;
         sessionStorage.setItem("opened", "1");
@@ -2774,6 +2780,7 @@
     /* Every release, newest first. One line each, in words about what
        changed on the page rather than what changed in the file. */
     const RELEASES = [
+      ["1 Oct 2026", "Version 1.0: complete offline download, Home Screen installation and independent staging and production releases."],
       ["31 Aug 2026", "The disappearing tab bar is the design library's now, so every app of mine gets it."],
       ["31 Aug 2026", "The wall opens out to five columns on a desktop screen, instead of stopping at three."],
       ["31 Aug 2026", "A line's popup takes about two thirds of a big screen, and the map moved into a tab of its own so it opens at that size."],
@@ -2893,7 +2900,7 @@
          the server whether this document has changed and reloads itself if
          it has. One HEAD request, and only when the tab is looked at. */
       let buildTag = null;
-      const readTag = () => fetch(location.pathname, { method: "HEAD", cache: "no-store" })
+      const readTag = () => !navigator.onLine ? Promise.resolve(null) : fetch(location.pathname, { method: "HEAD", cache: "no-store" })
         .then(r => r.headers.get("etag") || r.headers.get("last-modified"))
         .catch(() => null);
       readTag().then(t => { buildTag = t; });
@@ -2982,6 +2989,7 @@
       document.addEventListener("click", e => {
         const btn = e.target.closest(".line-heart");
         if (!btn) return;
+        if (!navigator.onLine) { fx()?.toast?.("Shared hearts need a connection. Your saved hearts remain available offline.", "info"); return; }
         const k = btn.dataset.heart;
         const on = !mine.has(k);
         on ? mine.add(k) : mine.delete(k);
@@ -3015,6 +3023,7 @@
             const d = await r.json();
             if (!d || typeof d.likes !== "number") throw new Error("no count came back");
             hearts.set(k, d.likes);
+            saveCounts();
             d.liked ? mine.add(k) : mine.delete(k);
             saveMine();
             paintHearts(true);

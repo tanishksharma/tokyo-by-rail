@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Private publishing review</title>
+  <style>
+    :root{font:15px/1.5 system-ui,sans-serif;color:#201a24;background:#f4f1eb}*{box-sizing:border-box}body{margin:0}header,main{max-width:1120px;margin:auto;padding:24px}header{padding-top:32px}h1,h2{line-height:1.2}h1{margin:0}h2{margin:28px 0 12px}.summary,.toolbar,.item,.preview,.inventory,.notes{background:white;border:1px solid #ded8e2;border-radius:12px;padding:16px}.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.summary strong{display:block;font-size:1.2rem}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.toolbar input,.toolbar select,textarea{font:inherit;padding:9px;border:1px solid #aaa;border-radius:7px}.toolbar input{flex:1;min-width:220px}.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}.item{min-width:0}.item[hidden]{display:none}.item h3{font-size:1rem;margin:0 0 5px}.item p{margin:5px 0;overflow-wrap:anywhere}.state{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.78rem;font-weight:700;background:#eee}.passed{background:#ddf4e4}.attention{background:#ffe2df}.pending{background:#fff0c2}.not-applicable{background:#e9e7ed}.source{font-size:.82rem}.preview img{display:block;max-width:min(100%,720px);max-height:380px;object-fit:contain;background:#eee}.inventory ul{max-height:420px;overflow:auto;padding-left:22px}.inventory li{margin:4px 0;overflow-wrap:anywhere}textarea{display:block;width:100%;min-height:180px;white-space:pre-wrap}.muted{color:#655e69;font-size:.9rem}code{overflow-wrap:anywhere}@media(max-width:520px){header,main{padding:16px}.items{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header><h1>Private publishing review</h1><p class="muted">Source metadata and publication files. Live checks use same-origin GET requests for pages and assets only.</p></header>
+  <main id="report"></main>
+  <script>
+    const data = /*REPORT_DATA*/null
+    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))
+    const groups = [...new Set(data.items.map(item => item.group))]
+    const notes = data.items.filter(item => ['attention','pending'].includes(item.status)).map(item => `- ${item.group}: ${item.label} — ${item.note || item.value}`).join('\n') || '- No attention or pending items'
+    const preview = data.preview?.image ? `<section class="preview"><h2>Link card preview</h2><p>${escapeHtml(data.preview.title)}</p><img src="${data.preview.image}" alt="${escapeHtml(data.preview.imageName)}"><p class="source">Image: <a href="${escapeHtml(data.preview.sourceHref)}">${escapeHtml(data.preview.imageName)}</a></p></section>` : '<section class="preview"><h2>Link card preview</h2><p class="muted">No local Open Graph image available in the publication files.</p></section>'
+    const imagePreviews = data.previewImages.length ? `<section class="preview"><h2>Published image previews</h2><div class="items">${data.previewImages.map(image=>`<article class="item"><img src="${image.image}" alt="${escapeHtml(image.path)}"><p><a href="${escapeHtml(image.href)}">${escapeHtml(image.path)}</a></p></article>`).join('')}</div></section>` : ''
+    document.querySelector('#report').innerHTML = `
+      <section class="summary"><div><strong>${data.publishedCount}</strong>published files</div><div><strong>${data.repositoryOnlyCount}</strong>repository-only docs and scripts</div><div><strong>${escapeHtml(data.publicationCommit)}</strong>publication commit</div><div><strong>${new Date(data.generatedAt).toLocaleString()}</strong>generated</div></section>
+      <h2>Search and filter</h2><section class="toolbar"><input id="search" type="search" placeholder="Search items"><select id="group"><option value="">All groups</option>${groups.map(group=>`<option>${escapeHtml(group)}</option>`).join('')}</select><select id="state"><option value="">All states</option>${['passed','attention','pending','not-applicable'].map(state=>`<option>${state}</option>`).join('')}</select></section>
+      <section id="review-items" class="items">${data.items.map(item=>`<article class="item" data-search="${escapeHtml(`${item.group} ${item.label} ${item.value} ${item.note}`.toLowerCase())}" data-group="${escapeHtml(item.group)}" data-state="${escapeHtml(item.status)}"><span class="state ${escapeHtml(item.status)}">${escapeHtml(item.status)}</span><h3>${escapeHtml(item.group)} · ${escapeHtml(item.label)}</h3><p>${escapeHtml(item.value)}</p>${item.note?`<p class="muted">${escapeHtml(item.note)}</p>`:''}${item.sourcePath?`<p class="source">Source: <a href="${escapeHtml(item.sourceHref)}">${escapeHtml(item.sourcePath)}</a></p>`:''}</article>`).join('')}</section>
+      ${preview}${imagePreviews}
+      <h2>Publication inventory</h2><section class="inventory"><p>Source: <code>${escapeHtml(data.sourceDirectory)}</code>${data.liveBase?` · Live base: <code>${escapeHtml(data.liveBase)}</code>`:''}</p><ul>${data.docs.map(file=>`<li><b>${escapeHtml(file.category)}</b> · <a href="${escapeHtml(file.href)}">${escapeHtml(file.path)}</a></li>`).join('')}</ul></section>
+      <h2>Review notes</h2><section class="notes"><p class="muted">Selected text. Edit before copying to the publication record.</p><textarea id="notes" aria-label="Compiled publishing review notes">${escapeHtml(notes)}</textarea></section>`
+    const filter = () => {const query=document.querySelector('#search').value.toLowerCase();const group=document.querySelector('#group').value;const state=document.querySelector('#state').value;for(const card of document.querySelectorAll('#review-items .item'))card.hidden=!(card.dataset.search.includes(query)&&(!group||card.dataset.group===group)&&(!state||card.dataset.state===state))}
+    document.querySelector('#search').addEventListener('input',filter)
+    document.querySelector('#group').addEventListener('change',filter)
+    document.querySelector('#state').addEventListener('change',filter)
+    document.querySelector('#notes').select()
+  </script>
+</body>
+</html>
