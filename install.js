@@ -25,7 +25,14 @@
     paint();
   });
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').then(registration => { const worker = registration.installing; if (worker) worker.addEventListener('statechange', () => { if (worker.state === 'redundant') { status = 'Offline download failed. Reconnect and reload before installing.'; paint(); } }); return navigator.serviceWorker.ready; }).then(() => {
+    navigator.serviceWorker.register('/sw.js').then(async registration => {
+      const worker = registration.installing || registration.waiting;
+      if (worker && worker.state !== 'activated') await new Promise((resolve, reject) => {
+        const check = () => { if (worker.state === 'activated') resolve(); else if (worker.state === 'redundant') reject(new Error('Offline download failed')); };
+        worker.addEventListener('statechange', check); check();
+      });
+      return navigator.serviceWorker.ready;
+    }).then(() => {
       ready = true; status = installed ? 'Installed. Ready for offline use.' : 'Ready for offline use. Add this app to your Home Screen for quick access.'; paint();
     }).catch(() => { status = 'Offline download failed. Reconnect and reload before installing.'; paint(); });
   } else { status = 'This browser cannot download the app for offline use. Open it in Chrome, Edge or Safari.'; paint(); }

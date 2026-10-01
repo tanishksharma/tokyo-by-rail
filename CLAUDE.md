@@ -477,7 +477,7 @@ The rules it establishes for anything added later:
   site stands alone.
 
 ## V1 release context
-- Version 1.0.0; main production at https://tokyorail.tanishk.ai/.
+- Version 1.0.1; main production at https://tokyorail.tanishk.ai/.
 - Staging branch previews at https://tokyorail-staging.tanishk.ai/.
 - Build, offline storage, installation and release checks: docs/publishing.md.
 - Core rail information works after complete offline download; shared hearts, opening counts and YouTube links need a connection.

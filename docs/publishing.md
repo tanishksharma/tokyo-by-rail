@@ -2,7 +2,7 @@
 
 ## Release target
 
-- App: Tokyo by Rail, version `1.0.0`.
+- App: Tokyo by Rail, version `1.0.1`.
 - Repository: public `tanishksharma/tokyo-by-rail`.
 - Production: `https://tokyorail.tanishk.ai` from `main`.
 - Staging: `https://tokyorail-staging.tanishk.ai` from `staging`.
@@ -36,7 +36,7 @@
 
 ## Version and rollback
 
-- Keep `version.json`, the visible app version, release record, and Git tag aligned at `1.0.0` / `v1.0.0` for this release.
+- Keep `version.json`, the visible app version, release record, and Git tag aligned at `1.0.1` / `v1.0.1` for this release.
 - Record each later release and create a matching `vX.Y.Z` tag.
 - To roll back, redeploy the prior known-ready Vercel deployment, then align the branch source with that release in the next approved change.
 
